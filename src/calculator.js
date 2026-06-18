@@ -8,6 +8,9 @@
  * - Subtraction (-)
  * - Multiplication (*)
  * - Division (/)
+ * - Modulo (%)
+ * - Power (^)
+ * - Square Root (sqrt)
  */
 
 const readline = require('readline');
@@ -29,6 +32,25 @@ const calculator = {
       throw new Error('Cannot divide by zero');
     }
     return a / b;
+  },
+  
+  // Modulo: returns the remainder of a divided by b
+  modulo: (a, b) => {
+    if (b === 0) {
+      throw new Error('Cannot perform modulo with zero divisor');
+    }
+    return a % b;
+  },
+  
+  // Power/Exponentiation: returns base raised to the exponent
+  power: (base, exponent) => Math.pow(base, exponent),
+  
+  // Square Root: returns the square root of n with error handling for negative numbers
+  squareRoot: (n) => {
+    if (n < 0) {
+      throw new Error('Cannot calculate square root of a negative number');
+    }
+    return Math.sqrt(n);
   }
 };
 
@@ -37,18 +59,30 @@ const operators = {
   '+': 'add',
   '-': 'subtract',
   '*': 'multiply',
-  '/': 'divide'
+  '/': 'divide',
+  '%': 'modulo',
+  '^': 'power'
 };
 
 // Parse and evaluate expression
 function evaluateExpression(expression) {
   const trimmed = expression.trim();
   
+  // Check for sqrt function (single operand)
+  const sqrtMatch = trimmed.match(/^sqrt\s*\(\s*(-?\d+\.?\d*)\s*\)$/i);
+  if (sqrtMatch) {
+    const num = parseFloat(sqrtMatch[1]);
+    if (isNaN(num)) {
+      throw new Error('Invalid number provided');
+    }
+    return calculator.squareRoot(num);
+  }
+  
   // Match pattern: number operator number
-  const match = trimmed.match(/^(-?\d+\.?\d*)\s*([+\-*/])\s*(-?\d+\.?\d*)$/);
+  const match = trimmed.match(/^(-?\d+\.?\d*)\s*([+\-*/%^])\s*(-?\d+\.?\d*)$/);
   
   if (!match) {
-    throw new Error('Invalid expression format. Use: number operator number (e.g., 5 + 3)');
+    throw new Error('Invalid expression format. Use: number operator number (e.g., 5 + 3) or sqrt(n)');
   }
   
   const [, num1Str, operator, num2Str] = match;
@@ -76,8 +110,8 @@ const rl = readline.createInterface({
 console.log('='.repeat(50));
 console.log('Welcome to the Node.js CLI Calculator!');
 console.log('='.repeat(50));
-console.log('\nSupported operations: + - * /');
-console.log('Example: 10 + 5\n');
+console.log('\nSupported operations: + - * / % ^ sqrt');
+console.log('Examples: 10 + 5, 2 ^ 3, 20 % 7, sqrt(16)\n');
 
 function promptUser() {
   rl.question('Enter expression (or "exit" to quit): ', (input) => {
